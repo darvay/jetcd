@@ -270,7 +270,11 @@ final class ClientConnectionManager {
                         wrappedFuture.complete(future.get());
                         execution.complete(wrappedFuture);
                     } catch (Exception error) {
+                        System.out.println("HAHAHAHAHA");
                         if (Errors.isInvalidTokenError(error)) {
+                            authCredential().refresh();
+                        }
+                        if (Errors.isAuthStoreExpired(error)) {
                             authCredential().refresh();
                         }
                         if (!execution.retryOn(error)) {
