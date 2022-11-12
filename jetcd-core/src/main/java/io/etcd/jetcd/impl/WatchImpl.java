@@ -244,6 +244,14 @@ final class WatchImpl extends Impl implements Watch {
                 // not be propagated to the listener
                 return;
             }
+            if (response.getCreated() && response.getCanceled() && response.getCancelReason() != null
+                && response.getCancelReason().contains("etcd server failed to create watch id")) {
+                // Etcd 3.5 throws a different error for watch failure
+                connectionManager().authCredential().refresh();
+                Status error = Status.Code.CANCELLED.toStatus().withDescription(response.getCancelReason());
+                handleError(toEtcdException(error), true);
+            }
+
 
             // handle a special case when watch has been created and closed at the same time
             if (response.getCreated() && response.getCanceled() && response.getCancelReason() != null
@@ -337,6 +345,10 @@ final class WatchImpl extends Impl implements Watch {
             if (shouldReschedule) {
                 if (etcdException.getMessage().contains("etcdserver: permission denied")) {
                     // potentially access token expired
+                    connectionManager().authCredential().refresh();
+                }
+                if (etcdException.getMessage().contains("etcd server failed to create watch id")) {
+                    // Etcd 3.5 watch failure requiring auth
                     connectionManager().authCredential().refresh();
                 }
 

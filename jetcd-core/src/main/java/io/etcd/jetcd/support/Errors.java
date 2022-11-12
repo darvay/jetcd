@@ -47,7 +47,7 @@ public final class Errors {
 
     public static boolean isAuthStoreExpired(Status status) {
         return (status.getCode() == Status.Code.UNAUTHENTICATED || status.getCode() == Status.Code.INVALID_ARGUMENT)
-                && ERROR_AUTH_STORE_OLD.equals(status.getDescription());
+            && ERROR_AUTH_STORE_OLD.equals(status.getDescription());
     }
 
     public static boolean isHaltError(final Status status) {
